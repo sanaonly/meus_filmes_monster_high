@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monster High G1 - Filmes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(45deg, #000000, #6a0dad, #4b0082);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden; /* Evita scroll horizontal em alguns casos */
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: bold;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            background: linear-gradient(45deg, #ff1493, #00ffff, #ff69b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 1rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .search-box::placeholder {
+            color: #666;
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .movie-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex; /* Para flexbox interno */
+            flex-direction: column; /* Conteúdo em coluna */
+            justify-content: space-between; /* Espaço entre o conteúdo e os botões */
+        }
+
+        .movie-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .movie-card:hover::before {
+            left: 100%;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, #ff69b4, #9932cc);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            position: relative;
+        }
+
+        .movie-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #fff;
+        }
+
+        .movie-year {
+            color: #ff69b4;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .movie-description {
+            line-height: 1.6;
+            margin-bottom: 20px;
+            opacity: 0.9;
+            flex-grow: 1; /* Permite que a descrição ocupe o espaço restante */
+        }
+
+        .movie-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center; /* Centraliza os botões */
+            margin-top: 15px; /* Espaçamento acima dos botões */
+        }
+
+        .watch-btn, .fav-btn, .watched-toggle-btn {
+            background: linear-gradient(45deg, #ff1493, #00ffff);
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            flex-grow: 1; /* Permite que os botões cresçam */
+            text-align: center;
+            white-space: nowrap; /* Evita quebra de linha nos botões */
+            font-size: 0.9em;
+        }
+
+        .watch-btn:hover, .fav-btn:hover, .watched-toggle-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255,20,147,0.4);
+        }
+
+        .fav-btn.favorited {
+            background: linear-gradient(45deg, #ff007f, #ff69b4); /* Rosa mais vibrante quando favorito */
+        }
+
+        .watched-toggle-btn.watched {
+            background: linear-gradient(45deg, #32cd32, #00ff00); /* Verde quando assistido */
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            margin-top: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ff69b4;
+        }
+
+        .stat-label {
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .movies-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats {
+                flex-direction: column;
+                gap: 20px;
+            }
+        }
+
+        /* Player Modal Styles */
+        .player-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .player-container {
+            width: 90%;
+            max-width: 800px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.2);
+            display: flex; /* Para flexbox interno */
+            flex-direction: column; /* Conteúdo em coluna */
+        }
+
+        .player-header {
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ff69b4;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close-btn:hover {
+            color: #ff69b4;
+        }
+
+        .video-container {
+            position: relative;
+            background: #000;
+        }
+
+        .movie-video {
+            width: 100%;
+            height: 400px;
+            background: #000;
+            display: block; /* Remove espaço extra abaixo do vídeo */
+        }
+
+        .player-controls {
+            padding: 20px;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap; /* Permite que os controles quebrem a linha em telas menores */
+        }
+
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .control-btn:hover {
+            color: #ff69b4;
+        }
+
+        .progress-container {
+            flex: 1;
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(45deg, #ff1493, #00ffff);
+            border-radius: 3px;
+            width: 0%;
+        }
+
+        .time-display {
+            color: white;
+            font-size: 0.9rem;
+            min-width: 80px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1 class="logo">👻 Monster High G1</h1>
+            <p class="subtitle">Sua coleção pessoal dos filmes das ghouls</p>
+        </header>
+
+        <div class="search-container">
+            <input type="text" class="search-box" placeholder="🔍 Procure por um filme..." id="searchInput">
+        </div>
+
+        <div class="movies-grid" id="moviesGrid">
+            
+</div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalMovies">0</div>
+                <div class="stat-label">Filmes</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="watchedMovies">0</div>
+                <div class="stat-label">Assistidos</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="favoriteMovies">0</div>
+                <div class="stat-label">Favoritos</div>
+            </div>
+        </div>
+    </div>
+
+    
+<div class="player-modal" id="playerModal">
+        <div class="player-container">
+            <div class="player-header">
+                <h3 class="player-title" id="playerTitle">Título do Filme</h3>
+                <button class="close-btn" onclick="closePlayer()">×</button>
+            </div>
+            
+            <div class="video-container">
+                <video class="movie-video" id="movieVideo">
+                    Seu navegador não suporta vídeo HTML5.
+                </video>
+            </div>
+            
+            <div class="player-controls">
+                <button class="control-btn" id="playPauseBtn">▶️</button>
+                <button class="control-btn" id="muteBtn">🔊</button>
+                <div class="time-display" id="currentTimeDisplay">00:00</div>
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <div class="time-display" id="durationDisplay">00:00</div>
+                <button class="control-btn" onclick="toggleFullscreen()">⛶</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados dos filmes
+        const moviesData = [
+            {
+                id: 'movie2',
+                title: 'Monster High: Por que os Monstros se Apaixonam',
+                year: 2012,
+                posterEmoji: '🐺',
+                description: 'É dia dos namorados na Monster High! As ghouls descobrem o verdadeiro significado do amor enquanto enfrentam novos desafios românticos.',
+                videoSrc: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0' // Exemplo de link do YouTube. Você pode trocar por outros.
+            },
+            {
+                id: 'movie3',
+                title: 'Monster High: Fuga da Ilha do Crânio',
+                year: 2012,
+                posterEmoji: '🌙',
+                description: 'As ghouls embarcam em uma aventura misteriosa quando são levadas para uma ilha assombrada cheia de segredos e perigos.',
+                videoSrc: 'https://www.dailymotion.com/video/x20y7eq' // Link atualizado (A Ilha do Esqueleto)
+            },
+            {
+                id: 'movie4',
+                title: 'Monster High: 13 Desejos',
+                year: 2013,
+                posterEmoji: '🎭',
+                description: 'Howleen Wolf encontra uma lâmpada mágica e seus desejos começam a se realizar, mas nem tudo sai como esperado na Monster High.',
+                videoSrc: 'https://drive.google.com/file/d/1-kVntNBU1_zBPHEpPXX9-j5Nn-wgCesT/view' // Mantido este link (não substituído pelo Tokyvideo)
+            },
+            {
+                id: 'movie5',
+                title: 'Monster High: Frights, Camera, Action!',
+                year: 2014,
+                posterEmoji: '🎪',
+                description: 'As ghouls viajam para Hauntlywood para visitar Elissabat, mas descobrem um mistério envolvendo o desaparecimento de um vampiro famoso.',
+                videoSrc: 'https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&rel=0'
+            },
+            {
+                id: 'movie6',
+                title: 'Monster High: Assombrada',
+                year: 2015,
+                posterEmoji: '❄️',
+                description: 'Spectra Vondergeist descobre segredos sombrios sobre Monster High quando fantasmas do passado retornam para assombrar a escola.',
+                videoSrc: 'https://www.tokyvideo.com/br/video/monster-high-assombrada' // Link atualizado
+            },
+            {
+                id: 'movie7', 
+                title: 'Os Pesadelos De Monster High',
+                year: 2013,
+                posterEmoji: '👻', 
+                description: 'Uma aventura assustadora onde os pesadelos ganham vida em Monster High!', 
+                videoSrc: 'https://www.tokyvideo.com/br/video/monster-high-os-pesadelos-de-monster-high' // Link atualizado (resolvendo a duplicação)
+            },
+            {
+                id: 'movie8', 
+                title: 'Scaris, A Cidade Sem Luz',
+                year: 2013, 
+                posterEmoji: '🇫🇷', 
+                description: 'As ghouls viajam para Scaris, a cidade da moda, e descobrem que a vida de uma monstrinha famosa não é tão simples quanto parece.', 
+                videoSrc: 'https://drive.google.com/file/d/1d2iC508eT5l7UIieLIKTl_uyO_YhsiBZ/view'
+            }
+        ];
+
+        // Variáveis de estado global
+        let watchedMovies = JSON.parse(localStorage.getItem('watchedMovies')) || [];
+        let favoriteMovies = JSON.parse(localStorage.getItem('favoriteMovies')) || [];
+
+        // Elementos do DOM
+        const moviesGrid = document.getElementById('moviesGrid');
+        const searchInput = document.getElementById('searchInput');
+        const playerModal = document.getElementById('playerModal');
+        const playerTitle = document.getElementById('playerTitle');
+        const movieVideo = document.getElementById('movieVideo');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeDisplay = document.getElementById('currentTimeDisplay');
+        const durationDisplay = document.getElementById('durationDisplay');
+        const totalMoviesDisplay = document.getElementById('totalMovies');
+        const watchedMoviesDisplay = document.getElementById('watchedMovies');
+        const favoriteMoviesDisplay = document.getElementById('favoriteMovies');
+
+        // Funções de Utilitário
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = Math.floor(seconds % 60);
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateStats() {
+            totalMoviesDisplay.textContent = moviesData.length;
+            watchedMoviesDisplay.textContent = watchedMovies.length;
+            favoriteMoviesDisplay.textContent = favoriteMovies.length;
+        }
+
+        function saveState() {
+            localStorage.setItem('watchedMovies', JSON.stringify(watchedMovies));
+            localStorage.setItem('favoriteMovies', JSON.stringify(favoriteMovies));
+        }
+
+        // Funções de Renderização
+        function renderMovies(filteredMovies = moviesData) {
+            moviesGrid.innerHTML = ''; // Limpa o grid antes de renderizar
+            filteredMovies.forEach((movie, index) => {
+                const isWatched = watchedMovies.includes(movie.id);
+                const isFavorite = favoriteMovies.includes(movie.id);
+
+                const movieCard = document.createElement('div');
+                movieCard.classList.add('movie-card');
+                if (isFavorite) {
+                    movieCard.classList.add('favorite');
+                    movieCard.style.border = '2px solid #ff69b4';
+                }
+                movieCard.dataset.movieId = movie.id; // Adiciona ID para facilitar a referência
+
+                movieCard.innerHTML = `
+                    <div class="movie-poster">${movie.posterEmoji}</div>
+                    <h3 class="movie-title">${movie.title}</h3>
+                    <p class="movie-year">${movie.year}</p>
+                    <p class="movie-description">${movie.description}</p>
+                    <div class="movie-actions">
+                        <button class="watch-btn" data-video-src="${movie.videoSrc}" data-movie-id="${movie.id}">Assistir</button>
+                        <button class="fav-btn ${isFavorite ? 'favorited' : ''}" data-movie-id="${movie.id}">💖 Favoritar</button>
+                        <button class="watched-toggle-btn ${isWatched ? 'watched' : ''}" data-movie-id="${movie.id}">${isWatched ? '✓ Assistido' : 'Marcar como Assistido'}</button>
+                    </div>
+                `;
+
+                // Adiciona o coração se já for favorito ao carregar
+                if (isFavorite) {
+                    const heart = document.createElement('div');
+                    heart.innerHTML = '💖';
+                    heart.style.position = 'absolute';
+                    heart.style.top = '10px';
+                    heart.style.right = '10px';
+                    heart.style.fontSize = '1.5rem';
+                    heart.style.animation = 'pulse 1s ease-in-out infinite alternate';
+                    movieCard.appendChild(heart);
+                }
+
+                moviesGrid.appendChild(movieCard);
+
+                // Aplica o efeito de loading
+                movieCard.style.opacity = '0';
+                movieCard.style.transform = 'translateY(50px)';
+                setTimeout(() => {
+                    movieCard.style.transition = 'all 0.6s ease';
+                    movieCard.style.opacity = '1';
+                    movieCard.style.transform = 'translateY(0)';
+                }, index * 100); // Atraso menor para renderização dinâmica
+            });
+
+            addEventListenersToMovieCards(); // Re-adiciona event listeners após renderização
+        }
+
+        function addEventListenersToMovieCards() {
+            document.querySelectorAll('.watch-btn').forEach(button => {
+                button.onclick = (event) => {
+                    const movieTitle = event.target.closest('.movie-card').querySelector('.movie-title').textContent;
+                    const videoSrc = event.target.dataset.videoSrc;
+                    const movieId = event.target.dataset.movieId;
+                    openPlayer(movieTitle, videoSrc);
+                    markAsWatched(movieId, event.target);
+                };
+            });
+
+            document.querySelectorAll('.fav-btn').forEach(button => {
+                button.onclick = (event) => {
+                    const movieId = event.target.dataset.movieId;
+                    toggleFavorite(movieId, event.target);
+                };
+            });
+
+            document.querySelectorAll('.watched-toggle-btn').forEach(button => {
+                button.onclick = (event) => {
+                    const movieId = event.target.dataset.movieId;
+                    toggleWatched(movieId, event.target);
+                };
+            });
+        }
+
+        // Funções do Player
+        function openPlayer(movieTitle, videoSrc) {
+            playerModal.style.display = 'flex';
+            playerTitle.textContent = movieTitle;
+            movieVideo.src = videoSrc;
+            movieVideo.load(); // Carrega o vídeo para que a duração esteja disponível
+            document.body.style.overflow = 'hidden'; // Impede o scroll do corpo
+            
+            // Adiciona listener para quando o vídeo estiver pronto para reproduzir
+            movieVideo.onloadedmetadata = () => {
+                durationDisplay.textContent = formatTime(movieVideo.duration);
+                movieVideo.play();
+                playPauseBtn.textContent = '⏸️'; // Atualiza o ícone do botão
+            };
+
+            movieVideo.ontimeupdate = () => {
+                progressBar.style.width = (movieVideo.currentTime / movieVideo.duration) * 100 + '%';
+                currentTimeDisplay.textContent = formatTime(movieVideo.currentTime);
+            };
+
+            movieVideo.onended = () => {
+                playPauseBtn.textContent = '▶️';
+            };
+        }
+
+        function closePlayer() {
+            playerModal.style.display = 'none';
+            movieVideo.pause();
+            movieVideo.currentTime = 0;
+            movieVideo.src = ''; // Limpa o src para evitar reprodução em segundo plano
+            document.body.style.overflow = 'auto'; // Restaura o scroll do corpo
+        }
+
+        function togglePlayPause() {
+            if (movieVideo.paused) {
+                movieVideo.play();
+                playPauseBtn.textContent = '⏸️';
+            } else {
+                movieVideo.pause();
+                playPauseBtn.textContent = '▶️';
+            }
+        }
+
+        function toggleMute() {
+            movieVideo.muted = !movieVideo.muted;
+            muteBtn.textContent = movieVideo.muted ? '🔇' : '🔊';
+        }
+
+        function setProgress(e) {
+            const clickX = e.offsetX;
+            const width = progressContainer.offsetWidth;
+            movieVideo.currentTime = (clickX / width) * movieVideo.duration;
+        }
+
+        function toggleFullscreen() {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            } else {
+                movieVideo.requestFullscreen().catch(() => {
+                    alert('Fullscreen não suportado neste navegador.');
+                });
+            }
+        }
+
+        // Funções de Interatividade
+        function markAsWatched(movieId, buttonElement) {
+            if (!watchedMovies.includes(movieId)) {
+                watchedMovies.push(movieId);
+                saveState();
+                updateStats();
+                
+                // Atualiza o botão "Assistir"
+                buttonElement.style.background = 'linear-gradient(45deg, #32cd32, #00ff00)';
+                buttonElement.textContent = '✓ Assistindo...';
+                setTimeout(() => {
+                    buttonElement.textContent = 'Assistir Novamente';
+                    buttonElement.style.background = 'linear-gradient(45deg, #ff1493, #00ffff)';
+                }, 2000);
+
+                // Atualiza o botão "Marcar como Assistido"
+                const watchedToggleBtn = document.querySelector(`.watched-toggle-btn[data-movie-id="${movieId}"]`);
+                if (watchedToggleBtn) {
+                    watchedToggleBtn.classList.add('watched');
+                    watchedToggleBtn.textContent = '✓ Assistido';
+                }
+            } else {
+                // Se já assistido, apenas muda o texto do botão "Assistir" temporariamente
+                buttonElement.textContent = 'Assistindo Novamente...';
+                setTimeout(() => {
+                    buttonElement.textContent = 'Assistir Novamente';
+                }, 1000);
+            }
+        }
+
+        function toggleFavorite(movieId, buttonElement) {
+            const movieCard = buttonElement.closest('.movie-card');
+            if (favoriteMovies.includes(movieId)) {
+                favoriteMovies = favoriteMovies.filter(id => id !== movieId);
+                buttonElement.classList.remove('favorited');
+                movieCard.style.border = '1px solid rgba(255, 255, 255, 0.2)'; // Volta ao normal
+                const heart = movieCard.querySelector('.movie-card > div:last-child'); // Pega o último div adicionado (coração)
+                if (heart && heart.innerHTML.includes('💖')) { // Verifica se é o coração
+                    movieCard.removeChild(heart);
+                }
+            } else {
+                favoriteMovies.push(movieId);
+                buttonElement.classList.add('favorited');
+                movieCard.style.border = '2px solid #ff69b4'; // Borda rosa
+                
+                // Adiciona coração visualmente
+                const heart = document.createElement('div');
+                heart.innerHTML = '💖';
+                heart.style.position = 'absolute';
+                heart.style.top = '10px';
+                heart.style.right = '10px';
+                heart.style.fontSize = '1.5rem';
+                heart.style.animation = 'pulse 1s ease-in-out infinite alternate';
+                movieCard.appendChild(heart);
+            }
+            saveState();
+            updateStats();
+        }
+
+        function toggleWatched(movieId, buttonElement) {
+            if (watchedMovies.includes(movieId)) {
+                watchedMovies = watchedMovies.filter(id => id !== movieId);
+                buttonElement.classList.remove('watched');
+                buttonElement.textContent = 'Marcar como Assistido';
+            } else {
+                watchedMovies.push(movieId);
+                buttonElement.classList.add('watched');
+                buttonElement.textContent = '✓ Assistido';
+            }
+            saveState();
+            updateStats();
+        }
+
+        // Event Listeners
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredMovies = moviesData.filter(movie =>
+                movie.title.toLowerCase().includes(searchTerm) ||
+                movie.description.toLowerCase().includes(searchTerm)
+            );
+            renderMovies(filteredMovies);
+        });
+
+        playPauseBtn.addEventListener('click', togglePlayPause);
+        muteBtn.addEventListener('click', toggleMute);
+        progressContainer.addEventListener('click', setProgress);
+
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMovies(); // Renderiza todos os filmes ao carregar a página
+            updateStats(); // Atualiza as estatísticas iniciais
+        });
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && playerModal.style.display === 'flex') {
+                closePlayer();
+            }
+        });
+    </script>
+</body>
+</html>
